@@ -315,12 +315,27 @@ function ltf_maybe_enqueue_assets($posts) {
 add_filter('the_posts', 'ltf_maybe_enqueue_assets');
 
 /**
- * Result page URL from settings, fallback to auto-created page.
+ * Result page ID from settings, fallback to auto-created page.
  */
-function ltf_get_result_page_url() {
+function ltf_get_result_page_id() {
     $s = ltf_get_settings();
     $id = absint($s['result_page_id']);
     if ($id && get_post_status($id)) {
+        return $id;
+    }
+    $page = get_page_by_path('leopard-tracking-result');
+    if ($page) {
+        return (int) $page->ID;
+    }
+    return 0;
+}
+
+/**
+ * Result page URL from settings, fallback to auto-created page.
+ */
+function ltf_get_result_page_url() {
+    $id = ltf_get_result_page_id();
+    if ($id) {
         return get_permalink($id);
     }
     $page = get_page_by_path('leopard-tracking-result');
@@ -329,6 +344,54 @@ function ltf_get_result_page_url() {
     }
     return home_url('/');
 }
+
+/**
+ * Non-AJAX safety net: if ?ltf_cn lands on any page other than the
+ * result page (e.g. stale form action, plain permalinks dropping
+ * ?page_id=, cached HTML), redirect to the result page preserving CN.
+ *
+ * Without this, method="get" forms submit to home_url('/') with only
+ * ?ltf_cn=... and appear to "just reload the page".
+ */
+function ltf_maybe_redirect_to_result_page() {
+    if (is_admin() || wp_doing_ajax() || (defined('REST_REQUEST') && REST_REQUEST)) {
+        return;
+    }
+    if (empty($_GET['ltf_cn'])) {
+        return;
+    }
+    // Only handle GET form submissions.
+    if (!empty($_SERVER['REQUEST_METHOD']) && strtoupper((string) $_SERVER['REQUEST_METHOD']) !== 'GET') {
+        return;
+    }
+
+    $cn = ltf_sanitize_cn(wp_unslash($_GET['ltf_cn']));
+    if ($cn === '') {
+        return;
+    }
+
+    $result_id = ltf_get_result_page_id();
+    if (!$result_id) {
+        return;
+    }
+    if (is_page($result_id)) {
+        return;
+    }
+    // Custom result page (shortcode present but ID not saved in settings): stay.
+    global $post;
+    if (is_object($post) && isset($post->post_content) &&
+        (has_shortcode($post->post_content, 'leopard_tracking_result'))) {
+        return;
+    }
+
+    $url = get_permalink($result_id);
+    if (!$url) {
+        return;
+    }
+    wp_safe_redirect(add_query_arg('ltf_cn', $cn, $url), 302);
+    exit;
+}
+add_action('template_redirect', 'ltf_maybe_redirect_to_result_page');
 
 /**
  * Sanitize a tracking number / comma list.
