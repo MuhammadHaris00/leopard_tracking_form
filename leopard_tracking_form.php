@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Leopard Tracking Form
  * Description:       Track Leopards Courier (Pakistan) shipments via shortcode. Auto-generated result page, AJAX + redirect modes, separate CSS, editable templates.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Muhammad Haris
