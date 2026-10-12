@@ -88,8 +88,14 @@ if (!defined('ABSPATH')) {
                 <details class="ltf-raw">
                     <summary><?php esc_html_e('View full shipment details', 'leopard-tracking-form'); ?></summary>
                     <dl class="ltf-meta">
-                        <?php foreach ($packet as $k => $v) :
+                        <?php
+                        $hidden_fields = array('email', 'phone', 'address', 'shipment_email', 'shipment_phone', 'shipment_address', 'consignee_email', 'consignee_phone', 'consignee_address', 'shipper_email', 'shipper_phone', 'shipper_address');
+                        foreach ($packet as $k => $v) :
                             if (is_array($v) || $v === '' || $v === null) {
+                                continue;
+                            }
+                            $key_lower = strtolower((string) $k);
+                            if (in_array($key_lower, $hidden_fields, true)) {
                                 continue;
                             }
                         ?>
