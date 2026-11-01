@@ -38,6 +38,7 @@ A WordPress plugin that lets customers track **Leopards Courier (Pakistan)** shi
 ```
 
 Attributes:
+
 - `placeholder` — input placeholder text.
 - `button` — submit button text.
 - `show_result_inline` — `yes` to show AJAX result inline; `no` to redirect to the result page.
@@ -51,10 +52,6 @@ The result page reads the tracking number from the `?ltf_cn=` query parameter.
 ### Templates
 
 Copy `templates/form.php` and/or `templates/result.php` into `your-theme/leopard-tracking/` to override the default markup.
-
-## Screenshots
-
-*(Add screenshots under `assets/screenshots/` if desired.)*
 
 ## License
 
